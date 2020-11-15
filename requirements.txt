@@ -1,0 +1,3 @@
+inflect>=4.1.0
+discord>=1.5.1
+python-dotenv>=0.14.0
