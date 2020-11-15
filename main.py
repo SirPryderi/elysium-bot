@@ -1,6 +1,7 @@
 import discord
 import random
 import os
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,12 +18,12 @@ dice = {
 }
 
 numbers = {
-  1: ":one:",
-  2: ":two:",
-  3: ":three:",
-  4: ":four:",
-  5: ":five:",
-  6: ":six:"
+    1: ":one:",
+    2: ":two:",
+    3: ":three:",
+    4: ":four:",
+    5: ":five:",
+    6: ":six:"
 }
 
 
@@ -33,15 +34,17 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-  print(message)
-  if message.author == client.user:
+  if message.author.bot:
     return
 
-  if message.content.startswith('!r'):
-    print("this should be posted")
+  if message.content == '!r':
     d1 = random.randint(1, 6)
     d2 = random.randint(1, 6)
     total = d1 + d2
     await message.channel.send(f"{numbers[d1]} {numbers[d2]} = **{total}**")
+
+  if re.match('!r \w+', message.content):
+    await message.channel.send(f"Not implemented!")
+
 
 client.run(os.getenv("DISCORD_TOKEN"))
