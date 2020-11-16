@@ -1,6 +1,5 @@
-inflect>=4.1.0
-discord>=1.5.1
-python-dotenv>=0.14.0
-google-api-python-client
-google-auth-httplib2
-google-auth-oauthlib
+discord==1.0.1
+python-dotenv==0.14.0
+google-api-python-client==1.12.5
+google-auth-httplib2==0.0.4
+google-auth-oauthlib==0.4.2
