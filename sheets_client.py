@@ -23,7 +23,7 @@ class SheetsEngine:
     self.waiting_auth = True
     return url
 
-  def save_authentication(self, code) -> None:
+  def save_authentication(self, code: str) -> None:
     self.flow.fetch_token(code=code)
     creds = self.flow.credentials
     with open('token.pickle', 'wb') as token:
@@ -40,3 +40,37 @@ class SheetsEngine:
       with open('token.pickle', 'rb') as token:
         self.creds = pickle.load(token)
         self.authenticated = True
+
+  def get_characters(self, campaign: str) -> Mapping:
+    # the range of the spreadsheet
+    range = f'{campaign}!A1:U26'
+
+    self.service = build('sheets', 'v4', credentials=self.creds)
+
+    # call the Sheets API
+    sheet = self.service.spreadsheets()
+    result = sheet.values().get(spreadsheetId=self.sheetId, range=range, majorDimension="COLUMNS").execute()
+    values = result.get('values')
+
+    # parse spreadsheet into a collection of character objects
+    skills = {}
+    characters = {}
+
+    for i_column, column in enumerate(values):
+      if column == []:
+        continue
+
+      if column[0] == "Character":
+        for row_i, row in enumerate(column):
+          if row in ["Skill", "Character", "Discord ID", ""]:
+            continue
+          skills[row.lower()] = row_i
+      elif column[0] != "":
+        name = column[0]
+        player = column[1]
+        character = {"name": name, "player": player, "skills": {}}
+        for skill, skill_i in skills.items():
+          character["skills"][skill] = int(values[i_column + 1][skill_i])
+        characters[player] = character
+
+    return characters
