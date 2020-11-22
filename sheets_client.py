@@ -14,6 +14,7 @@ class SheetsEngine:
     self.authenticated = False
     self.waiting_auth = False
     self.credentials = credentials
+    self.creds = None
     self.sheetId = sheetId
 
   def request_authentication(self) -> str:
