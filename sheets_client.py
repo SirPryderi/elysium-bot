@@ -41,6 +41,15 @@ class SheetsEngine:
         self.creds = pickle.load(token)
         self.authenticated = True
 
+  def get_sheets(self) -> list[str]:
+    self.service = build('sheets', 'v4', credentials=self.creds)
+    result = self.service.spreadsheets().get(spreadsheetId=self.sheetId).execute()
+    sheets = result.get('sheets', '')
+    result = []
+    for sheet in sheets:
+      result.append(sheet["properties"]["title"])
+    return result
+
   def get_characters(self, campaign: str) -> Mapping:
     # the range of the spreadsheet
     range = f'{campaign}!A1:U26'

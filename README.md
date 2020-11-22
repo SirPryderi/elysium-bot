@@ -19,3 +19,7 @@ Performs a dice roll + skill value for a current player. The player name must ma
 ### `!elysium-bot authorize`
 
 Performs authorization with Google Account to allow access to spreadsheets.
+
+### `!elysium-bot status`
+
+Returns status information about the bot. Useful to understand if something is wrong.

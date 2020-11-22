@@ -86,6 +86,21 @@ async def on_message(message: discord.Message):
     url = sheet.request_authentication()
     await message.channel.send(f"Click the url below and follow the instructions on screen.\n\n{url}\n\nOnce completed paste the code here as a message.")
 
+  if message.content == '!elysium-bot status':
+    lines = [
+        f"Authenticated: {sheet.creds != None}",
+        f"Token expired: {sheet.creds.expired}",
+    ]
+
+    try:
+      async with message.channel.typing():
+        sheets = sheet.get_sheets()
+      lines.append(f"Campaigns: {' | '.join(sheets)}")
+    except:
+      lines.append("sheet connection: failed")
+
+    await message.channel.send("\n".join(lines))
+
   if message.content == '!r':
     user_id = message.author.id
     d1 = random.randint(1, 6)
