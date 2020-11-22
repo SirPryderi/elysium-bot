@@ -87,10 +87,10 @@ async def on_message(message: discord.Message):
     await message.channel.send(f"Click the url below and follow the instructions on screen.\n\n{url}\n\nOnce completed paste the code here as a message.")
 
   if message.content == '!elysium-bot status':
-    lines = [
-        f"Authenticated: {sheet.creds != None}",
-        f"Token expired: {sheet.creds.expired}",
-    ]
+    lines = [ f"Authenticated: {sheet.creds != None}" ]
+
+    if sheet.creds != None:
+      lines.append(f"Auth expired: {sheet.creds.expired}")
 
     try:
       async with message.channel.typing():
