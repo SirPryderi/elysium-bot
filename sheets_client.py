@@ -41,7 +41,7 @@ class SheetsEngine:
         self.creds = pickle.load(token)
         self.authenticated = True
 
-  def get_sheets(self) -> list[str]:
+  def get_sheets(self) -> list:
     self.service = build('sheets', 'v4', credentials=self.creds)
     result = self.service.spreadsheets().get(spreadsheetId=self.sheetId).execute()
     sheets = result.get('sheets', '')
