@@ -4,10 +4,11 @@ import os.path
 from typing import Mapping
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-
+PICKLE = "token.pickle"
 
 class SheetsEngine:
   def __init__(self, credentials: Mapping, sheetId: str):
@@ -16,6 +17,16 @@ class SheetsEngine:
     self.credentials = credentials
     self.creds = None
     self.sheetId = sheetId
+
+  def pickle(self) -> None:
+    with open(PICKLE, 'wb') as token:
+      pickle.dump(self.creds, token)
+
+  def unpickle(self) -> None:
+    if not os.path.exists(PICKLE):
+      return
+    with open(PICKLE, 'rb') as token:
+      self.creds = pickle.load(token)
 
   def request_authentication(self) -> str:
     self.flow = InstalledAppFlow.from_client_config(self.credentials, SCOPES)
@@ -27,23 +38,31 @@ class SheetsEngine:
   def save_authentication(self, code: str) -> None:
     self.flow.fetch_token(code=code)
     creds = self.flow.credentials
-    with open('token.pickle', 'wb') as token:
-      pickle.dump(creds, token)
     self.creds = creds
+    self.pickle()
     self.waiting_auth = False
     self.authenticated = True
+
+  def keep_authenticated(self) -> None:
+    if self.creds and self.creds.expired and self.creds.refresh_token:
+      print("Attempting to re-authenticate client with refresh token")
+      self.creds.refresh(Request())
+      self.pickle()
 
   def load_authentication(self) -> None:
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('token.pickle'):
-      with open('token.pickle', 'rb') as token:
-        self.creds = pickle.load(token)
-        self.authenticated = True
+    self.unpickle()
+    self.keep_authenticated()
+    self.authenticated = True
+
+  def get_service(self) -> None:
+    self.keep_authenticated()
+    self.service = build('sheets', 'v4', credentials=self.creds)
 
   def get_sheets(self) -> list:
-    self.service = build('sheets', 'v4', credentials=self.creds)
+    self.get_service()
     result = self.service.spreadsheets().get(spreadsheetId=self.sheetId).execute()
     sheets = result.get('sheets', '')
     result = []
@@ -52,11 +71,9 @@ class SheetsEngine:
     return result
 
   def get_characters(self, campaign: str) -> Mapping:
+    self.get_service()
     # the range of the spreadsheet
     range = f'{campaign}!A1:U26'
-
-    self.service = build('sheets', 'v4', credentials=self.creds)
-
     # call the Sheets API
     sheet = self.service.spreadsheets()
     result = sheet.values().get(spreadsheetId=self.sheetId, range=range, majorDimension="COLUMNS").execute()
