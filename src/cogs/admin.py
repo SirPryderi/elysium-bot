@@ -30,8 +30,8 @@ class Admin(commands.Cog):
 
   @commands.guild_only()
   @commands.command()
-  async def authenticate(self, ctx: commands.Context, sheet_id: str):
-    """Authenticates the bot to your google sheet. The sheet_id can be found in the google sheet url."""
+  async def authorize(self, ctx: commands.Context, sheet_id: str):
+    """Authenticates the bot to your google sheet. The sheet_id can be found in the google sheet url, see https://developers.google.com/sheets/api/guides/concepts#spreadsheet_id"""
     url = self.sheet.request_authentication(str(ctx.channel.guild.id), sheet_id)
     await ctx.channel.send(f"Click the url below and follow the instructions on screen.\n\n{url}\n\nOnce completed write the `!token YOUR_CODE_HERE` as a message.")
 
