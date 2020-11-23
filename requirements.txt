@@ -3,3 +3,4 @@ python-dotenv==0.14.0
 google-api-python-client==1.12.5
 google-auth-httplib2==0.0.4
 google-auth-oauthlib==0.4.2
+redis==3.5.3

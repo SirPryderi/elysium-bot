@@ -1,4 +1,5 @@
-import json
+from file_credential_store import FileCredentialStore
+from redis_credential_store import RedisCredentialStore
 import discord
 import random
 import os
@@ -12,17 +13,14 @@ channel_type = discord.enums.ChannelType
 
 load_dotenv()
 
-credentials = json.loads(os.getenv("GOOGLE_API_CREDENTIALS"))
-spreadsheetId = os.getenv("SPREADSHEET_ID")
-
 client = discord.Client()
-sheet = SheetsEngine(credentials, spreadsheetId)
+credential_store = RedisCredentialStore() if os.getenv("REDIS_URL") else FileCredentialStore()
+sheet = SheetsEngine(credential_store)
 
 
 @client.event
 async def on_ready():
   print('We have logged in as {0.user}'.format(client))
-  sheet.load_authentication()
 
 
 async def check_critical(d1, d2, channel):
@@ -40,16 +38,37 @@ async def on_message(message: discord.Message):
 
   # only in DMs
   if message.channel.type == channel_type.private:
+    pass
+
+  # only in text channels
+  if message.channel.type == channel_type.text:
+    server = str(message.guild.id)
+    campaign = message.channel.name
+
     if sheet.waiting_auth:
       try:
-        sheet.save_authentication(message.content)
+        sheet.save_authentication(server, message.content)
       except:
         await message.channel.send(f":no_entry: Authentication failed!")
       else:
         await message.channel.send(f":white_check_mark: Authentication complete!")
 
-  # only in text channels
-  if message.channel.type == channel_type.text:
+    if message.content == '!elysium-bot status':
+      lines = []
+
+      async with message.channel.typing():
+        try:
+          sheets = sheet.get_sheets(server)
+          lines.append("Sheet connection: :ok:")
+          lines.append(f"Campaigns: {' | '.join(sheets)}")
+        except:
+          lines.append("Sheet connection: :warning:")
+          lines.append(f"Authenticated: {sheet.creds != None}")
+          if sheet.creds != None:
+            lines.append(f"Auth expired: {sheet.creds.expired}")
+
+      await message.channel.send("\n".join(lines))
+
     if re.match('!r \w+', message.content):
       async with message.channel.typing():
         d1 = random.randint(1, 6)
@@ -58,10 +77,11 @@ async def on_message(message: discord.Message):
         skill_name = message.content[3:].lower()
         user_name = message.author.name
         user_id = message.author.id
+        # TODO: handle authentication issue
         try:
-          characters = sheet.get_characters(campaign=message.channel.name)
+          characters = sheet.get_characters(server, campaign)
         except:
-          await message.channel.send(f"An error has occurred. Is `{message.channel.name}` a valid campaign sheet?")
+          await message.channel.send(f"An error has occurred. Is `{campaign}` a valid campaign sheet?")
           return
 
       if user_name not in characters:
@@ -85,21 +105,6 @@ async def on_message(message: discord.Message):
   if message.content == '!elysium-bot authenticate':
     url = sheet.request_authentication()
     await message.channel.send(f"Click the url below and follow the instructions on screen.\n\n{url}\n\nOnce completed paste the code here as a message.")
-
-  if message.content == '!elysium-bot status':
-    lines = [ f"Authenticated: {sheet.creds != None}" ]
-
-    if sheet.creds != None:
-      lines.append(f"Auth expired: {sheet.creds.expired}")
-
-    try:
-      async with message.channel.typing():
-        sheets = sheet.get_sheets()
-      lines.append(f"Campaigns: {' | '.join(sheets)}")
-    except:
-      lines.append("sheet connection: failed")
-
-    await message.channel.send("\n".join(lines))
 
   if message.content == '!r':
     user_id = message.author.id
