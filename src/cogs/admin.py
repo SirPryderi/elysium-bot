@@ -31,16 +31,26 @@ class Admin(commands.Cog):
   @commands.guild_only()
   @commands.command()
   async def authenticate(self, ctx: commands.Context, sheet_id: str):
-    """Authenticates the bot to your google sheet"""
+    """Authenticates the bot to your google sheet. The sheet_id can be found in the google sheet url."""
     url = self.sheet.request_authentication(str(ctx.channel.guild.id), sheet_id)
     await ctx.channel.send(f"Click the url below and follow the instructions on screen.\n\n{url}\n\nOnce completed write the `!token YOUR_CODE_HERE` as a message.")
 
   @commands.guild_only()
+  @commands.command()
+  async def detach(self, ctx: commands.Context):
+    """Disconnects the bot form the current sheet"""
+    try:
+      self.sheet.sheet_store.set(str(ctx.channel.guild.id), None)
+    except:
+      await ctx.channel.send(f":no_entry: There was an error!")
+    else:
+      await ctx.channel.send(f":white_check_mark: Sheet detached!")
+
+  @commands.guild_only()
   @commands.command(hidden=True)
   async def token(self, ctx: commands.Context, token: str):
-    self.sheet.save_authentication(str(ctx.channel.guild.id), token)
     try:
-      pass
+      self.sheet.save_authentication(str(ctx.channel.guild.id), token)
     except:
       await ctx.channel.send(f":no_entry: Authentication failed!")
     else:
