@@ -1,13 +1,13 @@
-from file_credential_store import FileCredentialStore
-from redis_credential_store import RedisCredentialStore
 import discord
 import random
 import os
 import re
-from sheets_client import SheetsEngine
 from dotenv import load_dotenv
 
-from emojis import numbers
+from src.file_credential_store import FileCredentialStore
+from src.redis_credential_store import RedisCredentialStore
+from src.sheets_client import SheetsEngine
+from src.emojis import numbers
 
 channel_type = discord.enums.ChannelType
 

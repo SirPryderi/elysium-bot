@@ -1,11 +1,12 @@
 from __future__ import print_function
 import json
 import os.path
-from redis_credential_store import RedisCredentialStore
 from typing import Mapping
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+
+from .redis_credential_store import RedisCredentialStore
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
