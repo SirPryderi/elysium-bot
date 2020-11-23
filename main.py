@@ -4,8 +4,8 @@ import os
 import re
 from dotenv import load_dotenv
 
-from src.file_credential_store import FileCredentialStore
-from src.redis_credential_store import RedisCredentialStore
+from src.credential_stores.file_credential_store import FileCredentialStore
+from src.credential_stores.redis_credential_store import RedisCredentialStore
 from src.sheets_client import SheetsEngine
 from src.emojis import numbers
 

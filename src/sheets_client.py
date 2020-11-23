@@ -6,14 +6,14 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-from .redis_credential_store import RedisCredentialStore
+from .credential_stores.credential_store import ICredentialStore
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 
 class SheetsEngine:
-  def __init__(self, credential_store: RedisCredentialStore):
+  def __init__(self, credential_store: ICredentialStore):
     self.credentials = json.loads(os.getenv("GOOGLE_API_CREDENTIALS"))
     self.sheetId = os.getenv("SPREADSHEET_ID")
     self.authenticated = False
