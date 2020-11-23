@@ -3,7 +3,7 @@ from discord.abc import Messageable
 from discord.member import Member
 from discord.ext import commands
 
-from ..sheets_client import SheetsEngine
+from ..sheets.engine import SheetsEngine
 from ..emojis import numbers
 
 

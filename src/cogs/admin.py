@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-from src.sheets_client import SheetsEngine
+from ..sheets.engine import SheetsEngine
 
 
 class Admin(commands.Cog):
@@ -20,25 +20,27 @@ class Admin(commands.Cog):
         lines.append("Sheet connection: :ok:")
         lines.append(f"Campaigns: {' | '.join(sheets)}")
       except:
+        sheet = self.sheet.sheet_store.get(server)
         lines.append("Sheet connection: :warning:")
-        lines.append(f"Authenticated: {self.sheet.creds != None}")
-        if self.sheet.creds != None:
+        lines.append(f"Sheet set: {sheet != None}")
+        if sheet and sheet.creds != None:
           lines.append(f"Auth expired: {self.sheet.creds.expired}")
 
     await ctx.channel.send("\n".join(lines))
 
   @commands.guild_only()
   @commands.command()
-  async def authenticate(self, ctx: commands.Context):
+  async def authenticate(self, ctx: commands.Context, sheet_id: str):
     """Authenticates the bot to your google sheet"""
-    url = self.sheet.request_authentication()
+    url = self.sheet.request_authentication(str(ctx.channel.guild.id), sheet_id)
     await ctx.channel.send(f"Click the url below and follow the instructions on screen.\n\n{url}\n\nOnce completed write the `!token YOUR_CODE_HERE` as a message.")
 
   @commands.guild_only()
   @commands.command(hidden=True)
   async def token(self, ctx: commands.Context, token: str):
+    self.sheet.save_authentication(str(ctx.channel.guild.id), token)
     try:
-      self.sheet.save_authentication(str(ctx.channel.guild.id), token)
+      pass
     except:
       await ctx.channel.send(f":no_entry: Authentication failed!")
     else:

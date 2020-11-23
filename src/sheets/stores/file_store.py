@@ -1,21 +1,22 @@
 import os
 import pickle
 from os.path import join
-from google.oauth2.credentials import Credentials
+
+from src.sheets.sheet import Sheet
 
 
-class FileCredentialStore:
+class FileSheetsStore:
   def server_file_path(_, server: str) -> str:
-    return join(".", "credentials", f"{server}.pickle")
+    return join(".", "sheets", f"{server}.pickle")
 
-  def get(self, server: str) -> Credentials:
+  def get(self, server: str) -> Sheet:
     path = self.server_file_path(server)
     if not os.path.exists(path):
       return None
     with open(path, 'rb') as token:
       return pickle.load(token)
 
-  def set(self, server: str, creds: Credentials) -> None:
+  def set(self, server: str, sheet: Sheet) -> None:
     path = self.server_file_path(server)
     with open(path, 'wb') as token:
-      pickle.dump(creds, token)
+      pickle.dump(sheet, token)

@@ -1,16 +1,16 @@
 from discord.ext import commands
 
-from .credential_stores.credential_store import ICredentialStore
-from .sheets_client import SheetsEngine
+from .sheets.engine import SheetsEngine
+from .sheets.stores.store import ISheetStore
 from .cogs.admin import Admin
 from .cogs.roll import Roll
 
 
 class ElysiumBot(commands.Bot):
-  def __init__(self, credential_store: ICredentialStore):
+  def __init__(self, sheet_store: ISheetStore):
     super().__init__(commands.when_mentioned_or("!"))
-    self.credential_store = credential_store
-    self.sheet = SheetsEngine(credential_store)
+    self.credential_store = sheet_store
+    self.sheet = SheetsEngine(sheet_store)
     self.add_cog(Admin(self.sheet))
     self.add_cog(Roll(self.sheet))
 
