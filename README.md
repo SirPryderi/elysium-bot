@@ -4,7 +4,7 @@ Elysium Bot is a Discord bot that helps with Disco Elysium based campaigns. It i
 
 ## Inviting the bot
 
-To invite the bot to your channel, press [here](https://discord.com/api/oauth2/authorize?client_id=777603092321402932&permissions=1379392&scope=bot).
+To invite the bot to your channel, press [here](https://discord.com/api/oauth2/authorize?client_id=777603092321402932&permissions=18496&scope=bot).
 
 ## Commands
 
