@@ -40,9 +40,14 @@ class SheetsEngine:
   def get_service(self, server: str):
     sheet = self.sheet_store.get(server)
     if not sheet:
-      print("Sheet not found")
+      raise self.SheetNotSetError()
+    if not sheet.creds:
+      raise self.SheetNotAuthorizedError()
     if sheet.keep_authenticated():
       self.sheet_store.set(server, sheet)
+    if sheet.creds.expired:
+      raise self.SheetAuthorizationExpiredError()
+
     return build('sheets', 'v4', credentials=sheet.creds), sheet
 
   def get_sheets(self, server: str) -> list:
@@ -84,3 +89,15 @@ class SheetsEngine:
         characters[player] = character
 
     return characters
+
+  class SheetEngineError(Exception):
+    pass
+
+  class SheetNotSetError(SheetEngineError):
+    pass
+
+  class SheetNotAuthorizedError(SheetEngineError):
+    pass
+
+  class SheetAuthorizationExpiredError(SheetEngineError):
+    pass

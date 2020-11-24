@@ -38,9 +38,17 @@ class Roll(commands.Cog):
 
       user_name = author.name
       user_id = author.id
-      # TODO: handle authentication issue
       try:
         characters = self.sheet.get_characters(server, campaign)
+      except SheetsEngine.SheetNotSetError:
+        await channel.send(f"No Google Sheets spreadsheet was configured.")
+        return
+      except SheetsEngine.SheetNotAuthorizedError:
+        await channel.send(f"A Google Sheets spreadsheet was specified, but it was not authorized. Did you forget to pass the token?")
+        return
+      except SheetsEngine.SheetAuthorizationExpiredError:
+        await channel.send(f"The authentication for the spreadsheet has expired, try authenticating it again.")
+        return
       except:
         await channel.send(f"An error has occurred. Is `{campaign}` a valid campaign sheet?")
         return
